@@ -18,14 +18,7 @@ from pytorch_lightning import seed_everything
 from ldm.util import instantiate_from_config
 from ldm.models.diffusion.ddim import DDIMSampler
 from ldm.models.diffusion.plms import PLMSSampler
-
-def get_device():
-    if(torch.cuda.is_available()):
-        return torch.device("cuda")
-    elif(torch.backends.mps.is_available()):
-        return torch.device("mps")
-    else:
-        return torch.device("cpu")
+from ldm.dream.devices         import choose_torch_device
 
 
 def chunk(it, size):
@@ -48,7 +41,7 @@ def load_model_from_config(config, ckpt, verbose=False):
         print("unexpected keys:")
         print(u)
 
-    model.to(get_device())
+    model.to(choose_torch_device())
     model.eval()
     return model
 
@@ -207,7 +200,7 @@ def main():
     config = OmegaConf.load(f"{opt.config}")
     model = load_model_from_config(config, f"{opt.ckpt}")
 
-    device = get_device()
+    device = choose_torch_device()
     model = model.to(device)
 
     if opt.plms:
